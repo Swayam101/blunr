@@ -1,0 +1,43 @@
+
+
+.nams-username.d-flex {
+    width: 100%;
+    flex-direction: row;
+    gap: 8px;
+    color: #000;
+    align-items: center;
+    line-height: 1;
+}
+
+.home-container.flex-row{
+    @media (max-width:1024px) {
+        padding-bottom: 67px;
+
+        app-chatbot{
+            display: none;
+        }
+
+        &.open-msg{
+            app-chatbot{
+                display: block;
+            }
+
+            .chat-list {
+                display: none;
+            }
+        }
+    }
+}
+
+.chat-list.no-chat {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        font-size: 40px;
+        opacity: 0.2;
+    }
+}
