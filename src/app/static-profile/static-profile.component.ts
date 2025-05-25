@@ -12,6 +12,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PaymentPageComponent } from '../shared/components/payment-page/payment-page.component';
 import { SubscriptionType } from '../core/constants/common.constant';
 import { ToastrService } from 'ngx-toastr';
+import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
 
 @Component({
   templateUrl: './static-profile.component.html',
@@ -24,8 +25,9 @@ export class StaticProfile implements OnInit {
   constructor(
     private readonly userService: UserService,
     private readonly route: ActivatedRoute,
-    private readonly toast: ToastrService
-  ) {}
+    private readonly toast: ToastrService,
+    private readonly confirmationService: ConfirmationDialogService
+  ) { }
 
   activeTab: string = 'step1';
 
@@ -98,11 +100,30 @@ export class StaticProfile implements OnInit {
   setActiveTab(tabId: string): void {
     this.activeTab = tabId;
   }
-  openSubscriptionModal(duration: '1_month' | '3_months' | '6_months') {
+  async openSubscriptionModal(duration: '1_month' | '3_months' | '6_months') {
     this.isLoading = true;
+
+    const amount = parseFloat(
+      this.currentUser.subscriptionPricing[duration]
+    );
+
+    if (amount === 0) {
+      const result = await this.confirmationService.confirm()
+      if (!result) return
+    }
+
+
     this.userService.subscribe(this.currentUser._id, duration).subscribe({
       next: (response) => {
-        this.isLoading = false;
+
+        const status = (response as any).subscription.status
+
+        if (status === 'active') {
+          this.toast.success('Subscription activated successfully!');
+          this.router.navigate(['/subscribed-account']);
+          return;
+        }
+
         const modalRef = this.modalService.open(PaymentPageComponent);
         modalRef.componentInstance.type = SubscriptionType.BUNDLE;
         modalRef.componentInstance.name = SubscriptionType.BUNDLE;
